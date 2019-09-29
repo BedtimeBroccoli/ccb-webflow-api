@@ -10,3 +10,9 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Local env file for testing
+.env
+
+# vendored copies of packages
+/vendor
