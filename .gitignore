@@ -15,4 +15,4 @@
 .env
 
 # vendored copies of packages
-/vendor
+# /vendor
