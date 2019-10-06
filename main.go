@@ -37,7 +37,7 @@ func main() {
 	// set up authenticated routes
 	needAuth := app.Party("/admin", authentication)
 	needAuth.Get("/whois", getPerson)
-	needAuth.Get("/form_responses/{type: string}", func(ctx iris.Context) {})
+	needAuth.Get("/form_responses/{type: string}", formResponsesGet)
 
 	// start API
 	app.Run(iris.Addr(":8080"))

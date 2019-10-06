@@ -1,6 +1,10 @@
 package main
 
-import "github.com/kataras/iris"
+import (
+	"fmt"
+
+	"github.com/kataras/iris"
+)
 
 var formIDs = map[string]int{
 	"connect_card_itech":         0,
@@ -10,5 +14,6 @@ var formIDs = map[string]int{
 }
 
 func formResponsesGet(ctx iris.Context) {
-
+	formName := ctx.Params().Get("type")
+	fmt.Println(formName)
 }
