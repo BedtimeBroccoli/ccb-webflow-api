@@ -57,5 +57,5 @@ func getPerson(ctx iris.Context) {
 		urlNameSearch = urlNameSearch + "&first_name=" + fullName[0]
 	}
 
-	makeCCBRequest(ctx, urlNameSearch, "GET")
+	makeCCBRequest(ctx, urlNameSearch, "GET", whoIsResponseHandler)
 }

@@ -11,7 +11,9 @@ import (
 	"github.com/kataras/iris"
 )
 
-func makeCCBRequest(ctx iris.Context, url string, method string) {
+type responseHandler func(ctx iris.Context, response CCBResponse)
+
+func makeCCBRequest(ctx iris.Context, url string, method string, handler responseHandler) {
 	// build http request
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
@@ -45,8 +47,55 @@ func makeCCBRequest(ctx iris.Context, url string, method string) {
 		ctx.WriteString("Error unmarshalling response from database")
 		return
 	}
-	jsonResponse, err := json.Marshal(data)
+
+	handler(ctx, data)
+}
+
+func whoIsResponseHandler(ctx iris.Context, resp CCBResponse) {
+	jsonResponse, err := json.Marshal(resp)
 	if nil != err {
+		fmt.Println(err) // TODO: this should be logged
+		ctx.StatusCode(http.StatusInternalServerError)
+		ctx.WriteString("Error marshalling to JSON")
+		return
+	}
+
+	// write back the body as JSON
+	ctx.Write([]byte(jsonResponse))
+}
+
+func formResponseHandler(ctx iris.Context, resp CCBResponse) {
+	// fill in fields from CCBResponse to a FormResponses struct
+	var formResponses FormResponses
+	formResponses.Count = resp.Response.FormResponses.Count
+	var jsonResponse []byte
+	var err error
+	if formResponses.Count != "0" {
+		for _, v := range resp.Response.FormResponses.FormResponse {
+			profInfo := map[string]string{}
+			answers := map[string]string{}
+			for _, info := range v.ProfileFields.ProfileInfo {
+				profInfo[info.Name] = info.Text
+			}
+			for i, t := range v.Answers.Title {
+				answers[t] = v.Answers.Choice[i]
+			}
+
+			s := FormData{
+				ID:          v.Form.ID,
+				ProfileInfo: profInfo,
+				Answers:     answers,
+				Created:     v.Created,
+				Modified:    v.Modified,
+			}
+			formResponses.Responses = append(formResponses.Responses, &s)
+		}
+		jsonResponse, err = json.Marshal(formResponses)
+	} else {
+		jsonResponse, err = json.Marshal(resp)
+	}
+
+	if err != nil {
 		fmt.Println(err) // TODO: this should be logged
 		ctx.StatusCode(http.StatusInternalServerError)
 		ctx.WriteString("Error marshalling to JSON")
@@ -215,4 +264,17 @@ type CCBResponse struct {
 			} `xml:"form_response,omitempty" json:"form_response,omitempty"`
 		} `xml:"form_responses,omitempty" json:"form_responses,omitempty"`
 	} `xml:"response,omitempty" json:"response,omitempty"`
+}
+
+type FormResponses struct {
+	Count     string      `json:"count,omitempty"`
+	Responses []*FormData `json:"responses,omitempty"`
+}
+
+type FormData struct {
+	ID          string            `json:"id,omitempty"`
+	ProfileInfo map[string]string `json:"profile_info,omitempty"`
+	Answers     map[string]string `json:"answers,omitempty"`
+	Created     string            `json:"created,omitempty"`
+	Modified    string            `json:"modified,omitempty"`
 }

@@ -31,5 +31,5 @@ func formResponsesGet(ctx iris.Context) {
 		urlFormResponses += "&modified_since=" + modifiedSince
 	}
 
-	makeCCBRequest(ctx, urlFormResponses, "GET")
+	makeCCBRequest(ctx, urlFormResponses, "GET", formResponseHandler)
 }
