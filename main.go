@@ -1,10 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"encoding/xml"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -15,15 +11,16 @@ import (
 )
 
 func init() {
+<<<<<<< HEAD
 	// autopilot.hq -> web page that interacts with APIs
 	// declarative business process flow
 
+=======
+>>>>>>> origin/feature/birthday
 }
 
 func main() {
 	app := iris.New()
-
-	fmt.Println(os.Getenv("GO_API_USERNAME"))
 
 	// basic auth set up
 	authConfig := basicauth.Config{
@@ -66,41 +63,5 @@ func getPerson(ctx iris.Context) {
 		urlNameSearch = urlNameSearch + "&first_name=" + fullName[0]
 	}
 
-	// build http request
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", urlNameSearch, nil)
-	if err != nil {
-		fmt.Println(err)
-		// TODO: better error handling here
-		return
-	}
-	req.SetBasicAuth(os.Getenv("CCB_USERNAME"), os.Getenv("CCB_PASSWORD"))
-
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		// TODO: better error handling here
-		return
-	}
-	defer resp.Body.Close()
-
-	// marshal body to XML, then JSON
-	var data CCBAPI
-	respBody, _ := ioutil.ReadAll(resp.Body)
-	err = xml.Unmarshal(respBody, &data)
-	if err != nil {
-		fmt.Println(err)
-		// TODO: better error handling here
-		return
-	}
-	jsonResponse, err := json.Marshal(data)
-	if nil != err {
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.WriteString("Error marshalling to JSON")
-		return
-	}
-
-	// write back the body as JSON
-	ctx.Write([]byte(jsonResponse))
+	makeCCBRequest(ctx, urlNameSearch, "GET", whoIsResponseHandler)
 }

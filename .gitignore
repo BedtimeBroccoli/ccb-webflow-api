@@ -13,6 +13,7 @@
 
 # Local env file for testing
 .env
+.vscode
 
 # vendored copies of packages
 # /vendor
