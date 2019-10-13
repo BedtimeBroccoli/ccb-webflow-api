@@ -15,6 +15,8 @@ import (
 )
 
 func init() {
+	// autopilot.hq -> web page that interacts with APIs
+	// declarative business process flow
 
 }
 
@@ -72,7 +74,7 @@ func getPerson(ctx iris.Context) {
 		// TODO: better error handling here
 		return
 	}
-	req.SetBasicAuth(os.Getenv("USERNAME"), os.Getenv("PASSWORD"))
+	req.SetBasicAuth(os.Getenv("CCB_USERNAME"), os.Getenv("CCB_PASSWORD"))
 
 	// send request
 	resp, err := client.Do(req)
