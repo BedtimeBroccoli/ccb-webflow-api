@@ -11,8 +11,11 @@ import (
 	"github.com/kataras/iris"
 )
 
+// responseHandler is a function that handles the response from CCB.
+// depending on the response from CCB, we may want to reformat the structs before passing them back to the user.
 type responseHandler func(ctx iris.Context, response CCBResponse)
 
+// makeCCBRequest can currently handle
 func makeCCBRequest(ctx iris.Context, url string, method string, handler responseHandler) {
 	// build http request
 	client := &http.Client{}
@@ -64,23 +67,34 @@ func whoIsResponseHandler(ctx iris.Context, resp CCBResponse) {
 	ctx.Write([]byte(jsonResponse))
 }
 
+// formResponseHandler changes the structure of the CCB response data to a more readable structure
+// before passing the JSON back to the user.
 func formResponseHandler(ctx iris.Context, resp CCBResponse) {
-	// fill in fields from CCBResponse to a FormResponses struct
+	// fill in count field from CCBResponse to a FormResponses struct
+	// create variables for iterator to fill in.
 	var formResponses FormResponses
 	formResponses.Count = resp.Response.FormResponses.Count
 	var jsonResponse []byte
 	var err error
+
+	// if there are more than 0 form responses returned, fill in the FormResponses struct
 	if formResponses.Count != "0" {
+		// range over the form responses from CCB
 		for _, v := range resp.Response.FormResponses.FormResponse {
-			profInfo := map[string]string{}
-			answers := map[string]string{}
+			profInfo := map[string]string{} // this will contain profile information
+			answers := map[string]string{}  // this will contain the form questions and answers
+
+			// range over profile information and move to a map with info.Name as the key and info.Text as the value
 			for _, info := range v.ProfileFields.ProfileInfo {
 				profInfo[info.Name] = info.Text
 			}
+
+			// range over XML unmarshalled "Answers" and move form questions and answers to a map
 			for i, t := range v.Answers.Title {
 				answers[t] = v.Answers.Choice[i]
 			}
 
+			// fill in the rest of the form data
 			s := FormData{
 				ID:          v.Form.ID,
 				ProfileInfo: profInfo,
@@ -88,10 +102,15 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 				Created:     v.Created,
 				Modified:    v.Modified,
 			}
+
+			// append the Form Data to formResponses.Responses
 			formResponses.Responses = append(formResponses.Responses, &s)
 		}
+		// marshal the formResponses to JSON
 		jsonResponse, err = json.Marshal(formResponses)
 	} else {
+		// if there are no results, just marshal the CCB response
+		// TODO: can probably handle this more gracefully. Return a not found Status code and message
 		jsonResponse, err = json.Marshal(resp)
 	}
 
@@ -106,7 +125,7 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 	ctx.Write([]byte(jsonResponse))
 }
 
-//CCBAPI represents the xml response from CCB individual search
+//CCBAPI represents the xml response from CCB individual search or CCB form response
 type CCBResponse struct {
 	Request struct {
 		Parameters struct {

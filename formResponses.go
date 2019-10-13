@@ -6,6 +6,8 @@ import (
 	"github.com/kataras/iris"
 )
 
+// formIDs maps the query parameter values to the CCB form IDs
+// this is used in building the request to CCB for form responses
 var formIDs = map[string]string{
 	"connect_card_itech":         "0",
 	"connect_card_jdd":           "85",
@@ -13,6 +15,9 @@ var formIDs = map[string]string{
 	"growth_track_sign_up_jdd":   "0",
 }
 
+// formResponsesGet handles the GET route for form responses.
+// it takes a parameter of a form name, and optionally takes a parameter of "modified_since"
+// returns form responses in JSON format
 func formResponsesGet(ctx iris.Context) {
 	formName := ctx.Params().Get("type")
 	modifiedSince := ctx.URLParam("modified_since")
