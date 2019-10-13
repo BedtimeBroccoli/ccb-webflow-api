@@ -17,3 +17,12 @@ By wrapping this DB in a JSON based API is becomes easier to user, and allows us
 * Business interface layer to the DB.
 * Support integration with a visual programming such as [Autopilot HQ](https://www.autopilothq.com).
 ** We have a small backend team, and development time is a struggle based on schedules. So utilizing an existing and extensible visual programming solution allows this API to be simpler and more expandable.
+
+## Quickstart
+
+```bash
+> make run
+go run ./
+Now listening on: http://localhost:8080
+Application started. Press CMD+C to shut down.
+```
