@@ -11,12 +11,6 @@ import (
 )
 
 func init() {
-<<<<<<< HEAD
-	// autopilot.hq -> web page that interacts with APIs
-	// declarative business process flow
-
-=======
->>>>>>> origin/feature/birthday
 }
 
 func main() {
