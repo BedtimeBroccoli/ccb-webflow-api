@@ -9,10 +9,11 @@ import (
 // formIDs maps the query parameter values to the CCB form IDs
 // this is used in building the request to CCB for form responses
 var formIDs = map[string]string{
-	"connect_card_itech":         "0",
+	"connect_card_itech":         "84",
 	"connect_card_jdd":           "85",
-	"growth_track_sign_up_itech": "0",
-	"growth_track_sign_up_jdd":   "0",
+	"growth_track_sign_up":       "167",
+	"growth_track_sign_up_itech": "70",
+	"growth_track_sign_up_jdd":   "69",
 }
 
 // formResponsesGet handles the GET route for form responses.
