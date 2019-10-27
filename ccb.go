@@ -26,7 +26,7 @@ func makeCCBRequest(ctx iris.Context, url string, method string, handler respons
 		ctx.WriteString("Error: Unable to build request to database. " + err.Error())
 		return
 	}
-	req.SetBasicAuth(os.Getenv("USERNAME"), os.Getenv("PASSWORD"))
+	req.SetBasicAuth(os.Getenv("CCB_USERNAME"), os.Getenv("CCB_PASSWORD"))
 
 	// send request
 	resp, err := client.Do(req)

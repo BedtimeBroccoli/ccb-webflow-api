@@ -13,3 +13,7 @@ heroku: $(DOCKER_CMD)
 	heroku container:push web
 
 up: $(DOCKER_CMD)
+
+# Run the API locally via Go.
+run:
+	go run ./
