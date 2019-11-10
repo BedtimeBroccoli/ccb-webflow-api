@@ -78,7 +78,7 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 	var err error
 
 	// if there are more than 0 form responses returned, fill in the FormResponses struct
-	if formResponses.Count != "0" {
+	if formResponses.Count != 0 {
 		// range over the form responses from CCB
 		for _, v := range resp.Response.FormResponses.FormResponse {
 			profInfo := map[string]string{} // this will contain profile information
@@ -90,12 +90,12 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 			}
 
 			// range over XML unmarshalled "Answers" and move form questions and answers to a map
-			for i, t := range v.Answers.Title {
-				answers[t] = v.Answers.Choice[i]
+			for i, questionTitle := range v.Answers.Title {
+				answers[questionTitle] = v.Answers.Choice[i]
 			}
 
 			// fill in the rest of the form data
-			s := FormData{
+			formData := FormData{
 				ID:          v.Form.ID,
 				ProfileInfo: profInfo,
 				Answers:     answers,
@@ -104,14 +104,16 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 			}
 
 			// append the Form Data to formResponses.Responses
-			formResponses.Responses = append(formResponses.Responses, &s)
+			formResponses.Responses = append(formResponses.Responses, &formData)
 		}
 		// marshal the formResponses to JSON
 		jsonResponse, err = json.Marshal(formResponses)
 	} else {
-		// if there are no results, just marshal the CCB response
-		// TODO: can probably handle this more gracefully. Return a not found Status code and message
-		jsonResponse, err = json.Marshal(resp)
+		// if there are no results, return a not found Status code and message
+		fmt.Println(err) // TODO: this should be logged
+		ctx.StatusCode(http.StatusNotFound)
+		ctx.WriteString("No results found")
+		return
 	}
 
 	if err != nil {
@@ -140,7 +142,7 @@ type CCBResponse struct {
 		ServiceAction string `xml:"service_action,omitempty" json:"service_action,omitempty"`
 		Availability  string `xml:"availability,omitempty" json:"availability,omitempty"`
 		Individuals   *struct {
-			Count      string `xml:"count,attr,omitempty" json:"count,omitempty"`
+			Count      int `xml:"count,attr,omitempty" json:"count,omitempty"`
 			Individual *struct {
 				ID           string `xml:"id,attr,omitempty" json:"id,omitempty"`
 				GivingNumber string `xml:"giving_number,omitempty" json:"giving_number,omitempty"`
@@ -257,7 +259,7 @@ type CCBResponse struct {
 			} `xml:"individual,omitempty" json:"individual,omitempty"`
 		} `xml:"individuals,omitempty" json:"individuals,omitempty"`
 		FormResponses *struct {
-			Count        string `xml:"count,attr,omitempty" json:"count,omitempty"`
+			Count        int `xml:"count,attr,omitempty" json:"count,omitempty"`
 			FormResponse []*struct {
 				ID   string `xml:"id,attr,omitempty" json:"id,omitempty"`
 				Form *struct {
@@ -286,14 +288,14 @@ type CCBResponse struct {
 }
 
 type FormResponses struct {
-	Count     string      `json:"count,omitempty"`
-	Responses []*FormData `json:"responses,omitempty"`
+	Count     int         `json:"count"`
+	Responses []*FormData `json:"responses"`
 }
 
 type FormData struct {
-	ID          string            `json:"id,omitempty"`
-	ProfileInfo map[string]string `json:"profile_info,omitempty"`
-	Answers     map[string]string `json:"answers,omitempty"`
-	Created     string            `json:"created,omitempty"`
-	Modified    string            `json:"modified,omitempty"`
+	ID          string            `json:"id"`
+	ProfileInfo map[string]string `json:"profile_info"`
+	Answers     map[string]string `json:"answers"`
+	Created     string            `json:"created"`
+	Modified    string            `json:"modified"`
 }
