@@ -64,7 +64,7 @@ func whoIsResponseHandler(ctx iris.Context, resp CCBResponse) {
 	}
 
 	// write back the body as JSON
-	ctx.Write([]byte(jsonResponse))
+	ctx.JSON(jsonResponse)
 }
 
 // formResponseHandler changes the structure of the CCB response data to a more readable structure
@@ -124,7 +124,7 @@ func formResponseHandler(ctx iris.Context, resp CCBResponse) {
 	}
 
 	// write back the body as JSON
-	ctx.Write([]byte(jsonResponse))
+	ctx.JSON(jsonResponse)
 }
 
 //CCBAPI represents the xml response from CCB individual search or CCB form response
