@@ -10,9 +10,9 @@ type AutopilotContact struct {
 }
 
 type CustomFields struct {
-	StepOne             time.Time `json:"date--Step--One"`
-	StepTwo             time.Time `json:"date--Step--Two"`
-	StepThree           time.Time `json:"date--Step--Three"`
-	StepFour            time.Time `json:"date--Step--Four"`
-	GrowthTrackGraduate bool      `json:"boolean--Growth--Track--Graduate"`
+	StepOne             *time.Time `json:"date--Step--One,omitempty"`
+	StepTwo             *time.Time `json:"date--Step--Two,omitempty"`
+	StepThree           *time.Time `json:"date--Step--Three,omitempty"`
+	StepFour            *time.Time `json:"date--Step--Four,omitempty"`
+	GrowthTrackGraduate bool       `json:"boolean--Growth--Track--Graduate,omitempty"`
 }
