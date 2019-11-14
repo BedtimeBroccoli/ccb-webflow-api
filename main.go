@@ -1,20 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/middleware/basicauth"
+	iris "github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/basicauth"
+	"github.com/mruVOUS/ccb-webflow-api/lib/middleware"
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-func init() {
-}
-
 func main() {
+	setupLogging()
+
 	app := iris.New()
+
+	// Recover middleware recovers from any panics and writes a 500 if there was one.
+	// app.Use(recover.New())
+
+	app.Use(middleware.NewLogging())
 
 	// basic auth set up
 	authConfig := basicauth.Config{
@@ -32,10 +41,14 @@ func main() {
 	needAuth.Get("/whois", getPerson)
 	needAuth.Get("/form_responses/{type: string}", formResponsesGet)
 
+	portNum := 8080
+	logrus.WithField("port", portNum).Info("Starting server.")
+
 	// start API
-	app.Run(iris.Addr(":8080"))
+	app.Run(iris.Addr(":" + strconv.Itoa(portNum)))
 }
 
+// TODO: Move this into a separate file.
 func getPerson(ctx iris.Context) {
 	// get name param from URL
 	name := ctx.URLParam("name")
@@ -57,5 +70,37 @@ func getPerson(ctx iris.Context) {
 		urlNameSearch = urlNameSearch + "&first_name=" + fullName[0]
 	}
 
-	makeCCBRequest(ctx, urlNameSearch, "GET", whoIsResponseHandler)
+	// makeCCBRequest(ctx, urlNameSearch, "GET", whoIsResponseHandler)
+}
+
+// setupLogging sets up test logging to respect the LOG_LEVEL env var and defaults
+// to plain text with colors output.
+func setupLogging() {
+	// Default to error. Allow override using LOG_LEVEL env var.
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel != "" {
+		lvl, err := logrus.ParseLevel(logLevel)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Invalid value for LOG_LEVEL env var: "+logLevel)
+			os.Exit(1)
+		}
+		logrus.SetLevel(lvl)
+	} else {
+		logrus.SetLevel(logrus.InfoLevel)
+	}
+
+	logType := os.Getenv("LOG_TYPE")
+	if logType == "json" {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	} else {
+		logrus.SetFormatter(&prefixed.TextFormatter{
+			DisableColors:    false,
+			ForceColors:      true,
+			ForceFormatting:  true,
+			DisableTimestamp: true,
+		})
+	}
+
+	// Set so the library methods that init their own logging follow the same log level.
+	os.Setenv("LOG_LEVEL", logrus.GetLevel().String())
 }
