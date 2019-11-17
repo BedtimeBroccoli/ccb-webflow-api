@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"time"
 
 	iris "github.com/kataras/iris/v12"
@@ -44,8 +44,8 @@ func formResponsesGet(ctx iris.Context) {
 	logger.WithFields(logrus.Fields{
 		"type":           formName,
 		"modified_since": modifiedSinceStr,
-		"page": page,
-		"page_size": pageSize,
+		"page":           page,
+		"page_size":      pageSize,
 	}).Info("Get form responses.")
 
 	// if no form name given, return error
@@ -80,10 +80,10 @@ func formResponsesGet(ctx iris.Context) {
 	envconfig.MustProcess("", &svcConfig)
 	svc := ccb.New(svcConfig)
 	resp, err := svc.GetFormResponses(ctx.Request().Context(), ccb.GetFormResponsesRequest{
-		FormID: formID,
+		FormID:        formID,
 		ModifiedSince: modifiedSince,
-		Page: 1,
-		PageSize: 10,
+		Page:          1,
+		PageSize:      10,
 		// TODO: Pass in paging parameters.
 	})
 	if err != nil {
@@ -101,5 +101,5 @@ func formResponsesGet(ctx iris.Context) {
 	ctx.StatusCode(http.StatusOK)
 	ctx.ContentType("application/json")
 	ctx.Write(out)
-	return;
+	return
 }
